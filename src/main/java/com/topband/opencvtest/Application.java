@@ -1,0 +1,83 @@
+package com.topband.opencvtest;
+
+
+import com.topband.opencvtest.common.FaceUtils;
+import com.topband.opencvtest.common.Myframe;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.highgui.HighGui;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import java.awt.image.BufferedImage;
+
+/**
+ * @author ludi
+ * @version 1.0
+ * @date 2020/9/21 11:01
+ * @remark
+ */
+public class Application {
+
+    static {
+        //直接下载window版，解压，使用里边的dll
+        //linux 需要下载源码，生成so库 https://www.52pojie.cn/thread-872736-1-1.html
+        System.load("D:\\opencv\\build\\java\\x64\\opencv_java440.dll");
+        System.out.println("opencv\t" + Core.VERSION);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to OpenCV " + Core.VERSION);
+        Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
+        System.out.println("OpenCV Mat: " + m);
+        Mat mr1 = m.row(1);
+        mr1.setTo(new Scalar(1));
+        Mat mc5 = m.col(5);
+        mc5.setTo(new Scalar(5));
+        System.out.println("OpenCV Mat data:\n" + m.dump());
+        detectface();
+
+    }
+
+    public static void cutFace() {
+        String sour = "D:\\Documents\\pic\\y3.png";
+        String des = "D:\\Documents\\pic\\y31.jpg";
+        boolean res = FaceUtils.detectFaceAndCut(sour, des);
+        System.out.println("cutFace:" + res);
+
+    }
+
+    public static void contrast() {
+        String sour = "D:\\Documents\\pic\\311.jpg";
+        String des = "D:\\Documents\\pic\\x1.jpg";
+        double db = FaceUtils.cmpPic2(sour, des);
+        System.out.println("相似度:\n" + db);
+    }
+
+    public static void detectface() {
+        String address = "D:\\Documents\\pic\\morefases.png";
+        try {
+            //创建一个mat
+            Mat img_mat = new Mat();
+            img_mat = FaceUtils.bufImg2Mat(FaceUtils.loadImage(address));
+            img_mat = FaceUtils.detectFace(img_mat);//检测人脸
+            BufferedImage img2paint = FaceUtils.mat2BI(img_mat);
+            Myframe f = new Myframe();
+            f.setSize(img2paint.getWidth() + 200, img2paint.getHeight() + 200);
+            f.draw(img2paint);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public static void testLoadImg() {
+        Mat src = Imgcodecs.imread("D:\\Documents\\pic\\0.jfif");
+        HighGui gui = new HighGui();
+        gui.imshow("哈妮", src);
+        gui.waitKey(1000);
+    }
+
+}
