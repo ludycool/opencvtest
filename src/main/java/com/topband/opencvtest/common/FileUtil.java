@@ -59,7 +59,14 @@ public class FileUtil {
     public static String getResourceAbsolutePath(String fileName) {
         String appPath = getAppicationPath();
         String fullPath = appPath + File.separator + fileName;
-        return fullPath;
+        try {
+            InputStream inputStream = getResourceStream(fileName);
+            boolean sucee = createFile(fullPath, inputStream, false);
+            return fullPath;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
     /**
      * 获取资源文件流

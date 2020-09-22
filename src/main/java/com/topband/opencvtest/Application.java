@@ -2,6 +2,7 @@ package com.topband.opencvtest;
 
 
 import com.topband.opencvtest.common.FaceUtils;
+import com.topband.opencvtest.common.FileUtil;
 import com.topband.opencvtest.common.Myframe;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -11,6 +12,7 @@ import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
  * @author ludi
@@ -23,7 +25,7 @@ public class Application {
     static {
         //直接下载window版，解压，使用里边的dll
         //linux 需要下载源码，生成so库 https://www.52pojie.cn/thread-872736-1-1.html
-        System.load("D:\\opencv\\build\\java\\x64\\opencv_java440.dll");
+        System.load(FileUtil.getAppicationPath()+ File.separator +"libs\\opencv_java440.dll");
         System.out.println("opencv\t" + Core.VERSION);
     }
 
@@ -41,22 +43,22 @@ public class Application {
     }
 
     public static void cutFace() {
-        String sour = "D:\\Documents\\pic\\y3.png";
-        String des = "D:\\Documents\\pic\\y31.jpg";
+        String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
+        String des =  FileUtil.getAppicationPath()+ File.separator +"x3.jpg";
         boolean res = FaceUtils.detectFaceAndCut(sour, des);
         System.out.println("cutFace:" + res);
 
     }
 
     public static void contrast() {
-        String sour = "D:\\Documents\\pic\\311.jpg";
-        String des = "D:\\Documents\\pic\\x1.jpg";
+        String sour = FileUtil.getResourceAbsolutePath("x22.jpg");
+        String des = FileUtil.getResourceAbsolutePath("x1.jpg");
         double db = FaceUtils.cmpPic2(sour, des);
         System.out.println("相似度:\n" + db);
     }
 
     public static void detectface() {
-        String address = "D:\\Documents\\pic\\morefases.png";
+        String address = FileUtil.getResourceAbsolutePath("morefases.png");
         try {
             //创建一个mat
             Mat img_mat = new Mat();
@@ -74,7 +76,7 @@ public class Application {
 
 
     public static void testLoadImg() {
-        Mat src = Imgcodecs.imread("D:\\Documents\\pic\\0.jfif");
+        Mat src = Imgcodecs.imread(FileUtil.getResourceAbsolutePath("0.jfif"));
         HighGui gui = new HighGui();
         gui.imshow("哈妮", src);
         gui.waitKey(1000);

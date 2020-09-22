@@ -27,7 +27,7 @@ import static org.opencv.imgproc.Imgproc.cvtColor;
 public class FaceUtils {
 
 
-    public static final String cascadeClassifierXml =FileUtil.getResourceAbsolutePath("\\haarcascades\\haarcascade_frontalface_alt2.xml");
+    public static final String cascadeClassifierXml =FileUtil.getResourceAbsolutePath("data\\haarcascades\\haarcascade_frontalface_alt2.xml");
 
 
 
