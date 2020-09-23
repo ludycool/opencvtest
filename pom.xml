@@ -91,11 +91,11 @@
 
         <!-- 直接下载window版，解压，使用里边的jar包也可以 -->
         <!--<dependency>-->
-            <!--<groupId>org.bytedeco</groupId>-->
-            <!--<artifactId>javacv</artifactId>-->
-            <!--<version>440</version>-->
-            <!--<scope>system</scope>-->
-            <!--<systemPath>${project.basedir}/libs/opencv-440.jar</systemPath>-->
+        <!--<groupId>org.bytedeco</groupId>-->
+        <!--<artifactId>javacv</artifactId>-->
+        <!--<version>440</version>-->
+        <!--<scope>system</scope>-->
+        <!--<systemPath>${project.basedir}/libs/opencv-440.jar</systemPath>-->
         <!--</dependency>-->
     </dependencies>
     <dependencyManagement>

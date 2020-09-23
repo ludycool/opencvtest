@@ -4,15 +4,18 @@ package com.topband.opencvtest;
 import com.topband.opencvtest.common.FaceUtils;
 import com.topband.opencvtest.common.FileUtil;
 import com.topband.opencvtest.common.Myframe;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
+import org.opencv.core.*;
+import org.opencv.face.Face;
+import org.opencv.face.Facemark;
+import org.opencv.features2d.ORB;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author ludi
@@ -22,10 +25,12 @@ import java.io.File;
  */
 public class Application {
 
+
+
     static {
         //直接下载window版，解压，使用里边的dll
         //linux 需要下载源码，生成so库 https://www.52pojie.cn/thread-872736-1-1.html
-        System.load(FileUtil.getAppicationPath()+ File.separator +"libs\\opencv_java440.dll");
+        System.load(FileUtil.getAppicationPath()+ File.separator +"libs\\opencv_java410.dll");
         System.out.println("opencv\t" + Core.VERSION);
     }
 
@@ -50,6 +55,26 @@ public class Application {
 
     }
 
+    public static void contrast3() {
+        String sour ="D:\\Documents\\pic\\x3.jfif";
+        String des = "D:\\Documents\\pic\\x3.jpg";
+        Mat   src = FaceUtils.bufImg2Mat(FaceUtils.loadImage(sour));
+
+
+        MatOfKeyPoint keypoints = new MatOfKeyPoint();
+        ORB detector = ORB.create();
+        detector.detect(src, keypoints);
+
+        HighGui gui = new HighGui();
+        gui.imshow("哈妮", src);
+        gui.waitKey(1000);
+    }
+    public static void contrast2() {
+        String sour ="D:\\Documents\\pic\\311.jpg";
+        String des = "D:\\Documents\\pic\\x1.jpg";
+        double db = FaceUtils.compare_image(sour, des);
+        System.out.println("相似度:\n" + db);
+    }
     public static void contrast() {
         String sour = FileUtil.getResourceAbsolutePath("x22.jpg");
         String des = FileUtil.getResourceAbsolutePath("x1.jpg");

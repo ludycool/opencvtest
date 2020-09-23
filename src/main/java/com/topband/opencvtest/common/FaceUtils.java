@@ -14,6 +14,7 @@ import java.awt.image.WritableRaster;
 import java.io.*;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.cvtColor;
@@ -29,7 +30,7 @@ public class FaceUtils {
 
     public static final String cascadeClassifierXml =FileUtil.getResourceAbsolutePath("data\\haarcascades\\haarcascade_frontalface_alt2.xml");
 
-
+    public static  final   CascadeClassifier faceDetector = new CascadeClassifier(cascadeClassifierXml);
 
 
 
@@ -322,7 +323,8 @@ public class FaceUtils {
             listImg2.add(hsv_des);
 
             MatOfFloat ranges = new MatOfFloat(0, 255);
-            MatOfInt histSize = new MatOfInt(50);
+            //直方图大小， 越大匹配越精确 (越慢)
+            MatOfInt histSize = new MatOfInt(1000);
             MatOfInt channels = new MatOfInt(0);
 
             org.opencv.core.Mat histImg1 = new org.opencv.core.Mat();
@@ -394,4 +396,41 @@ public class FaceUtils {
 
         return succ;
     }
+
+    // 灰度化人脸
+    public static Mat conv_Mat(String img) {
+        Mat image0 = Imgcodecs.imread(img);
+        Mat image1 = new Mat();
+        // 灰度化
+        Imgproc.cvtColor(image0, image1, Imgproc.COLOR_BGR2GRAY);
+        // 探测人脸
+//        MatOfRect faceDetections = new MatOfRect();
+//        faceDetector.detectMultiScale(image1, faceDetections);
+//        // rect中人脸图片的范围
+//        for (Rect rect : faceDetections.toArray()) {
+//            Mat face = new Mat(image1, rect);
+//            return face;
+//        }
+        return image1;
+    }
+
+    public static double compare_image(String img_1, String img_2) {
+        Mat mat_1 = conv_Mat(img_1);
+        Mat mat_2 = conv_Mat(img_2);
+        Mat hist_1 = new Mat();
+        Mat hist_2 = new Mat();
+
+        //颜色范围
+        MatOfFloat ranges = new MatOfFloat(0f, 256f);
+        //直方图大小， 越大匹配越精确 (越慢)
+        MatOfInt histSize = new MatOfInt(1000);
+
+        Imgproc.calcHist(Arrays.asList(mat_1), new MatOfInt(0), new Mat(), hist_1, histSize, ranges);
+        Imgproc.calcHist(Arrays.asList(mat_2), new MatOfInt(0), new Mat(), hist_2, histSize, ranges);
+
+        // CORREL 相关系数
+        double res = Imgproc.compareHist(hist_1, hist_2, Imgproc.CV_COMP_CORREL);
+        return res;
+    }
+
 }
