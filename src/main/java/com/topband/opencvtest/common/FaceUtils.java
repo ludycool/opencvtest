@@ -414,6 +414,32 @@ public class FaceUtils {
         return image1;
     }
 
+    /**
+     * 侦查脸 把第一个脸 取出来 并且灰度化
+     *
+     * @param srcFileName 源图片 位置
+     * @return 是否成功
+     */
+    public static Mat getFaceAndConv(String srcFileName) {
+        boolean succ = false;
+        try {
+            //创建一个mat
+            Mat img_mat  =Imgcodecs.imread(srcFileName);
+            img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
+            if (img_mat != null) {
+                Mat image1 = new Mat();
+                // 灰度化
+                Imgproc.cvtColor(img_mat, image1, Imgproc.COLOR_BGR2GRAY);
+                return image1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
     public static double compare_image(String img_1, String img_2) {
         Mat mat_1 = conv_Mat(img_1);
         Mat mat_2 = conv_Mat(img_2);

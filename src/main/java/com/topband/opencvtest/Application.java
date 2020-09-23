@@ -1,21 +1,15 @@
 package com.topband.opencvtest;
 
 
-import com.topband.opencvtest.common.FaceUtils;
-import com.topband.opencvtest.common.FileUtil;
-import com.topband.opencvtest.common.Myframe;
+import com.topband.opencvtest.common.*;
 import org.opencv.core.*;
-import org.opencv.face.Face;
-import org.opencv.face.Facemark;
 import org.opencv.features2d.ORB;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
 
 /**
  * @author ludi
@@ -43,13 +37,20 @@ public class Application {
         Mat mc5 = m.col(5);
         mc5.setTo(new Scalar(5));
         System.out.println("OpenCV Mat data:\n" + m.dump());
-        detectface();
-
+//        try {
+//            TrainUtil.train("D:\\Documents\\pic\\imagedb","D:\\Documents\\pic\\model");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+     Recognition.testetect();
     }
 
     public static void cutFace() {
-        String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
-        String des =  FileUtil.getAppicationPath()+ File.separator +"x3.jpg";
+       // String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
+        //String des =  FileUtil.getAppicationPath()+ File.separator +"x3.jpg";
+        String sour = "D:\\Documents\\pic\\lulu.jpg";
+        String des =  "D:\\Documents\\pic\\ld.jpg";
+
         boolean res = FaceUtils.detectFaceAndCut(sour, des);
         System.out.println("cutFace:" + res);
 
@@ -76,14 +77,14 @@ public class Application {
         System.out.println("相似度:\n" + db);
     }
     public static void contrast() {
-        String sour = FileUtil.getResourceAbsolutePath("x22.jpg");
+        String sour = FileUtil.getResourceAbsolutePath("x1.jpg");
         String des = FileUtil.getResourceAbsolutePath("x1.jpg");
         double db = FaceUtils.cmpPic2(sour, des);
         System.out.println("相似度:\n" + db);
     }
 
     public static void detectface() {
-        String address = FileUtil.getResourceAbsolutePath("morefases.png");
+        String address = FileUtil.getResourceAbsolutePath("x3.jfif");
         try {
             //创建一个mat
             Mat img_mat = new Mat();
