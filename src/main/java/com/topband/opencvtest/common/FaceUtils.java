@@ -155,6 +155,7 @@ public class FaceUtils {
             for (Rect rect : rects) {
                 System.out.println(rect);
                 Mat sub = mat_img.submat(rect);
+               // Mat face = new Mat(mat_img, rect);
                 if (rect.width > 500) {//最大300
                     Mat mat = new Mat();
                     Size size = new Size(500, 500);
