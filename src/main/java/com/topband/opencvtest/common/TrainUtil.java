@@ -82,6 +82,8 @@ public class TrainUtil {
      **/
     public static void train(String imageFolder, String saveFolder)
             throws IOException {
+
+        // OpenCV 自带了三个人脸识别算法：Eigenfaces，Fisherfaces 和局部二值模式直方图 (LBPH)
         FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
        // CascadeClassifier faceCascade = new CascadeClassifier();
 // opencv的模型
