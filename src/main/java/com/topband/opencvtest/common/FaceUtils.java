@@ -155,14 +155,11 @@ public class FaceUtils {
             for (Rect rect : rects) {
                 System.out.println(rect);
                 Mat sub = mat_img.submat(rect);
-               // Mat face = new Mat(mat_img, rect);
-                if (rect.width > 500) {//最大300
-                    Mat mat = new Mat();
-                    Size size = new Size(500, 500);
-                    Imgproc.resize(sub, mat, size);
-                    return mat;
-                }
-                return sub;
+                // Mat face = new Mat(mat_img, rect);
+                Mat mat = new Mat();
+                Size size = new Size(100, 100);//统一尺寸 对比更好
+                Imgproc.resize(sub, mat, size);
+                return mat;
             }
         }
         return null;
@@ -400,18 +397,19 @@ public class FaceUtils {
     // 灰度化人脸
     public static Mat conv_Mat(String img) {
         Mat image0 = Imgcodecs.imread(img);
+
         Mat image1 = new Mat();
         // 灰度化
         Imgproc.cvtColor(image0, image1, Imgproc.COLOR_BGR2GRAY);
         // 探测人脸
-//        MatOfRect faceDetections = new MatOfRect();
-//        faceDetector.detectMultiScale(image1, faceDetections);
-//        // rect中人脸图片的范围
-//        for (Rect rect : faceDetections.toArray()) {
-//            Mat face = new Mat(image1, rect);
-//            return face;
-//        }
-        return image1;
+        MatOfRect faceDetections = new MatOfRect();
+        faceDetector.detectMultiScale(image1, faceDetections);
+        // rect中人脸图片的范围
+        for (Rect rect : faceDetections.toArray()) {
+            Mat face = new Mat(image1, rect);
+            return face;
+        }
+        return null;
     }
 
     /**

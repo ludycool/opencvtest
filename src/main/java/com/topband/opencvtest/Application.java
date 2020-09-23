@@ -43,6 +43,7 @@ public class Application {
 //            e.printStackTrace();
 //        }
    //Recognition.testetect();
+        contrast2();
     }
 
     public static void cutFace() {
@@ -71,8 +72,8 @@ public class Application {
         gui.waitKey(1000);
     }
     public static void contrast2() {
-        String sour ="D:\\Documents\\pic\\311.jpg";
-        String des = "D:\\Documents\\pic\\x1.jpg";
+        String sour ="D:\\Documents\\pic\\41.png";
+        String des = "D:\\Documents\\pic\\hhm.jfif";
         double db = FaceUtils.compare_image(sour, des);
         System.out.println("相似度:\n" + db);
     }
