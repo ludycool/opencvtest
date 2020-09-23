@@ -28,11 +28,9 @@ import static org.opencv.imgproc.Imgproc.cvtColor;
 public class FaceUtils {
 
 
-    public static final String cascadeClassifierXml =FileUtil.getResourceAbsolutePath("data\\haarcascades\\haarcascade_frontalface_alt2.xml");
+    public static final String cascadeClassifierXml = FileUtil.getResourceAbsolutePath("data\\haarcascades\\haarcascade_frontalface_alt2.xml");
 
-    public static  final   CascadeClassifier faceDetector = new CascadeClassifier(cascadeClassifierXml);
-
-
+    public static final CascadeClassifier faceDetector = new CascadeClassifier(cascadeClassifierXml);
 
 
     /**
@@ -157,11 +155,12 @@ public class FaceUtils {
             for (Rect rect : rects) {
                 System.out.println(rect);
                 Mat sub = mat_img.submat(rect);
-
-//                Mat mat = new Mat();
-//                Size size = new Size(100, 100);
-//                Imgproc.resize(sub, mat, size);
-
+                if (rect.width > 500) {//最大300
+                    Mat mat = new Mat();
+                    Size size = new Size(500, 500);
+                    Imgproc.resize(sub, mat, size);
+                    return mat;
+                }
                 return sub;
             }
         }
@@ -345,10 +344,10 @@ public class FaceUtils {
             result1 = Imgproc.compareHist(histImg1, histImg2, Imgproc.HISTCMP_CHISQR);
             result2 = Imgproc.compareHist(histImg1, histImg2, Imgproc.HISTCMP_INTERSECT);
             result3 = Imgproc.compareHist(histImg1, histImg2, Imgproc.HISTCMP_BHATTACHARYYA);
-            result0= (double) Math.round(result0 * 10000) / 10000;//四位小数
-            result1= (double) Math.round(result1 * 10000) / 10000;
-            result2= (double) Math.round(result2 * 10000) / 10000;//四位小数
-            result3= (double) Math.round(result3 * 10000) / 10000;//四位小数
+            result0 = (double) Math.round(result0 * 10000) / 10000;//四位小数
+            result1 = (double) Math.round(result1 * 10000) / 10000;
+            result2 = (double) Math.round(result2 * 10000) / 10000;//四位小数
+            result3 = (double) Math.round(result3 * 10000) / 10000;//四位小数
             System.out.println("相关性（度量越高，匹配越准确 [基准：" + HISTCMP_CORREL_THRESHOLD + "]）,当前值:" + result0);
             System.out.println("卡方（度量越低，匹配越准确 [基准：" + HISTCMP_CHISQR_THRESHOLD + "]）,当前值:" + result1);
             System.out.println("交叉核（度量越高，匹配越准确 [基准：" + HISTCMP_INTERSECT_THRESHOLD + "]）,当前值:" + result2);
@@ -424,7 +423,7 @@ public class FaceUtils {
         boolean succ = false;
         try {
             //创建一个mat
-            Mat img_mat  =Imgcodecs.imread(srcFileName);
+            Mat img_mat = Imgcodecs.imread(srcFileName);
             img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
             if (img_mat != null) {
                 Mat image1 = new Mat();

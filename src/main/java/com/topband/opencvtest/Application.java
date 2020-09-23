@@ -42,14 +42,14 @@ public class Application {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-     Recognition.testetect();
+   //Recognition.testetect();
     }
 
     public static void cutFace() {
        // String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
         //String des =  FileUtil.getAppicationPath()+ File.separator +"x3.jpg";
-        String sour = "D:\\Documents\\pic\\lulu.jpg";
-        String des =  "D:\\Documents\\pic\\ld.jpg";
+        String sour = "D:\\Documents\\pic\\gyy.jfif";
+        String des =  "D:\\Documents\\pic\\gyy.jpg";
 
         boolean res = FaceUtils.detectFaceAndCut(sour, des);
         System.out.println("cutFace:" + res);
