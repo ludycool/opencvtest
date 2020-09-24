@@ -24,12 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TrainUtil {
 
-    public static  void  testDetectAndCollect()
-    {
-        Mat  img_mat = FaceUtils.bufImg2Mat(FaceUtils.loadImage("D:\\Documents\\pic\\morefases.png"));
-        detectAndCollect(img_mat,FaceUtils.faceDetector);
+    public static void testDetectAndCollect() {
+        Mat img_mat = OpenCvUtil.bufImg2Mat(OpenCvUtil.loadImage("D:\\Documents\\pic\\morefases.png"));
+        detectAndCollect(img_mat, FaceUtils.faceDetector);
 
     }
+
     private static int startFrom = 0;
 
     private static int sample = 0;
@@ -42,6 +42,8 @@ public class TrainUtil {
     static AtomicBoolean start = new AtomicBoolean(false);
 
     public static long startTime;
+
+    public final static String modeFileName = "face_model.yml";
 
 
     /**
@@ -85,9 +87,9 @@ public class TrainUtil {
 
         // OpenCV 自带了三个人脸识别算法：Eigenfaces，Fisherfaces 和局部二值模式直方图 (LBPH)
         FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
-       // CascadeClassifier faceCascade = new CascadeClassifier();
+        // CascadeClassifier faceCascade = new CascadeClassifier();
 // opencv的模型
-      //  faceCascade.load(FaceUtils.cascadeClassifierXml);
+        //  faceCascade.load(FaceUtils.cascadeClassifierXml);
 // 读取文件于数组中
         File[] files = new File(imageFolder).listFiles();
         Map<String, Integer> nameMapId = new HashMap<String, Integer>(10);
@@ -96,7 +98,7 @@ public class TrainUtil {
 // 名称集合
         List<String> names = new ArrayList<String>(files.length);
         List<Integer> ids = new ArrayList<Integer>(files.length);
-        for (int index = 0; index < files.length; index++ ) {
+        for (int index = 0; index < files.length; index++) {
 // 解析文件名 获取名称
             File file = files[index];
             String name = file.getName().split("\\.")[0];
@@ -125,7 +127,7 @@ public class TrainUtil {
 // 调用训练方法
         faceRecognizer.train(images, labels);
 // 输出持久化模型文件 训练一次后就可以一直调用
-        faceRecognizer.save(saveFolder + "/face_model.yml");
+        faceRecognizer.save(saveFolder + File.separator + modeFileName);
     }
 
 

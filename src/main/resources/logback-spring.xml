@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+	<property name="project_name" value="pluto" />
+	<property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n" />
+	<!-- 日志最大的历史 30天 -->
+	<property name="maxHistory" value="30" />
+	<property name="maxFileSize" value="3MB" />
+	<property name="maxHistory" value="200" />
+
+	<springProfile name="local">
+		<property name="log_path" value="logs" />
+	</springProfile>
+	
+	<springProfile name="dev">
+		<property name="log_path" value="logs" />
+	</springProfile>
+
+	<springProfile name="test">
+		<property name="log_path" value="logs" />
+	</springProfile>
+
+	<springProfile name="online">
+		<property name="log_path" value="logs" />
+	</springProfile>
+
+	<!-- 控制台输出 -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="project"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log_path}/info.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${log_path}/info/info.%d{yyyy-MM-dd HH}-%i.log
+			</FileNamePattern>
+			<!-- 文件最大保存历史数量 -->
+			<MaxHistory>${maxHistory}</MaxHistory>
+			<!-- 文件最大容量 -->
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>${maxFileSize}</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>${pattern}</pattern>
+		</layout>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+	<appender name="project_error"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log_path}/error.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${log_path}/error/error.%d{yyyy-MM-dd HH}-%i.log
+			</FileNamePattern>
+			<!-- 文件最大保存历史数量 -->
+			<MaxHistory>${maxHistory}</MaxHistory>
+			<!-- 文件最大容量 -->
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>${maxFileSize}</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>${pattern}</pattern>
+		</layout>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+
+
+	<logger name="com.baomidou" level="DEBUG"/>
+	<logger name="org.springframework.jdbc.datasource.init" level="DEBUG"/>
+
+
+	<springProfile name="local">
+		<root level="INFO">
+			<appender-ref ref="console" />
+			<appender-ref ref="project" />
+			<appender-ref ref="project_error" />
+		</root>
+	</springProfile>
+
+	<springProfile name="dev">
+		<root level="INFO">
+			<appender-ref ref="console" />
+			<appender-ref ref="project" />
+			<appender-ref ref="project_error" />
+		</root>
+	</springProfile>
+
+	<springProfile name="test">
+		<root level="INFO">
+			<appender-ref ref="project" />
+			<appender-ref ref="project_error" />
+		</root>
+	</springProfile>
+
+	<springProfile name="online">
+		<root level="INFO">
+			<appender-ref ref="project" />
+			<appender-ref ref="project_error" />
+		</root>
+	</springProfile>
+
+</configuration>

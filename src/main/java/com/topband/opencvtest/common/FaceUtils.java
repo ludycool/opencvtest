@@ -4,15 +4,8 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.ResourceUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
-import java.io.*;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,87 +24,6 @@ public class FaceUtils {
     public static final String cascadeClassifierXml = FileUtil.getResourceAbsolutePath("data\\haarcascades\\haarcascade_frontalface_alt2.xml");
 
     public static final CascadeClassifier faceDetector = new CascadeClassifier(cascadeClassifierXml);
-
-
-    /**
-     * 加载图片
-     *
-     * @param add
-     * @return 一个bufferedImage
-     */
-    public static BufferedImage loadImage(String add) {
-        try {
-            BufferedImage img = ImageIO.read(new File(add));
-            return img;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 保存图片
-     *
-     * @param img
-     * @param fileName
-     * @return
-     */
-    public static boolean saveImage(BufferedImage img, String fileName) {
-        try {
-            int doidx = fileName.lastIndexOf(".");
-            String formatName = fileName.substring(doidx + 1);
-
-            File outputfile = new File(fileName);
-            ImageIO.write(img, formatName, outputfile);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * BufferedImage转换成Mat
-     *
-     * @param src 要转换的BufferedImage
-     */
-    public static Mat bufImg2Mat(BufferedImage src) {
-        if (src.getType() != BufferedImage.TYPE_3BYTE_BGR) {
-            BufferedImage image = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-            image.getGraphics().drawImage(src, 0, 0, null);
-            src = image;
-        }
-        WritableRaster raster = src.getRaster();
-        DataBufferByte buffer = (DataBufferByte) raster.getDataBuffer();
-        byte[] pixels = buffer.getData();
-        Mat mat = Mat.eye(src.getHeight(), src.getWidth(), CvType.CV_8UC3);
-        mat.put(0, 0, pixels);
-        return mat;
-    }
-
-    /**
-     * Mat转换成BufferedImage
-     *
-     * @param mat 要转换的Mat
-     * @return
-     */
-    public static BufferedImage mat2BI(Mat mat) {
-        int dataSize = mat.cols() * mat.rows() * (int) mat.elemSize();
-        byte[] data = new byte[dataSize];
-        mat.get(0, 0, data);
-        int type = mat.channels() == 1 ?
-                BufferedImage.TYPE_BYTE_GRAY : BufferedImage.TYPE_3BYTE_BGR;
-        if (type == BufferedImage.TYPE_3BYTE_BGR) {
-            for (int i = 0; i < dataSize; i += 3) {
-                byte blue = data[i + 0];
-                data[i + 0] = data[i + 2];
-                data[i + 2] = blue;
-            }
-        }
-        BufferedImage image = new BufferedImage(mat.cols(), mat.rows(), type);
-        image.getRaster().setDataElements(0, 0, mat.cols(), mat.rows(), data);
-        return image;
-    }
 
     /**
      * 侦查脸 并把脸画框框
@@ -154,12 +66,12 @@ public class FaceUtils {
         if (rects != null && rects.length >= 1) {
             for (Rect rect : rects) {
                 System.out.println(rect);
-                Mat sub = mat_img.submat(rect);
-                // Mat face = new Mat(mat_img, rect);
-                Mat mat = new Mat();
-                Size size = new Size(100, 100);//统一尺寸 对比更好
-                Imgproc.resize(sub, mat, size);
-                return mat;
+                //Mat sub = mat_img.submat(rect);
+                Mat face = new Mat(mat_img, rect);
+               // Mat mat = new Mat();
+                //Size size = new Size(200, 200);//统一尺寸 对比更好
+               // Imgproc.resize(sub, mat, size);
+                return face;
             }
         }
         return null;
@@ -381,11 +293,11 @@ public class FaceUtils {
         boolean succ = false;
         try {
             //创建一个mat
-            Mat img_mat = FaceUtils.bufImg2Mat(FaceUtils.loadImage(srcFileName));
+            Mat img_mat = OpenCvUtil.bufImg2Mat(OpenCvUtil.loadImage(srcFileName));
             img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
             if (img_mat != null) {
-                BufferedImage img2paint = FaceUtils.mat2BI(img_mat);
-                return saveImage(img2paint, dstFileName);
+                BufferedImage img2paint = OpenCvUtil.mat2BI(img_mat);
+                return OpenCvUtil.saveImage(img2paint, dstFileName);
             }
         } catch (Exception e) {
             e.printStackTrace();

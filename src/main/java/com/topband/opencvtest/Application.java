@@ -2,10 +2,15 @@ package com.topband.opencvtest;
 
 
 import com.topband.opencvtest.common.*;
+import com.topband.opencvtest.config.AppConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.*;
 import org.opencv.features2d.ORB;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -17,40 +22,36 @@ import java.io.IOException;
  * @date 2020/9/21 11:01
  * @remark
  */
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}
+        , scanBasePackages = {"com.topband.opencvtest"})
+@Slf4j
 public class Application {
-
-
 
     static {
         //直接下载window版，解压，使用里边的dll
         //linux 需要下载源码，生成so库 https://www.52pojie.cn/thread-872736-1-1.html
-        System.load(FileUtil.getAppicationPath()+ File.separator +"libs\\opencv_java410.dll");
+        System.load(FileUtil.getAppicationPath() + File.separator + "libs\\opencv_java410.dll");
         System.out.println("opencv\t" + Core.VERSION);
     }
 
     public static void main(String[] args) {
-        System.out.println("Welcome to OpenCV " + Core.VERSION);
+        log.info("Welcome to OpenCV " + Core.VERSION);
         Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
-        System.out.println("OpenCV Mat: " + m);
-        Mat mr1 = m.row(1);
-        mr1.setTo(new Scalar(1));
-        Mat mc5 = m.col(5);
-        mc5.setTo(new Scalar(5));
-        System.out.println("OpenCV Mat data:\n" + m.dump());
-//        try {
-//            TrainUtil.train("D:\\Documents\\pic\\imagedb","D:\\Documents\\pic\\model");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-   //Recognition.testetect();
-        contrast2();
+        // System.out.println("OpenCV Mat: " + m);
+        log.info("OpenCV Mat: " + m);
+//        Mat mr1 = m.row(1);
+//        mr1.setTo(new Scalar(1));
+//        Mat mc5 = m.col(5);
+//        mc5.setTo(new Scalar(5));
+        //System.out.println("OpenCV Mat data:\n" + m.dump());
+        AppConfig.context = SpringApplication.run(Application.class, args);
     }
 
     public static void cutFace() {
-       // String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
+        // String sour =  FileUtil.getResourceAbsolutePath("x3.jfif");
         //String des =  FileUtil.getAppicationPath()+ File.separator +"x3.jpg";
         String sour = "D:\\Documents\\pic\\gyy.jfif";
-        String des =  "D:\\Documents\\pic\\gyy.jpg";
+        String des = "D:\\Documents\\pic\\gyy.jpg";
 
         boolean res = FaceUtils.detectFaceAndCut(sour, des);
         System.out.println("cutFace:" + res);
@@ -58,9 +59,9 @@ public class Application {
     }
 
     public static void contrast3() {
-        String sour ="D:\\Documents\\pic\\x3.jfif";
+        String sour = "D:\\Documents\\pic\\x3.jfif";
         String des = "D:\\Documents\\pic\\x3.jpg";
-        Mat   src = FaceUtils.bufImg2Mat(FaceUtils.loadImage(sour));
+        Mat src = OpenCvUtil.bufImg2Mat(OpenCvUtil.loadImage(sour));
 
 
         MatOfKeyPoint keypoints = new MatOfKeyPoint();
@@ -71,12 +72,14 @@ public class Application {
         gui.imshow("哈妮", src);
         gui.waitKey(1000);
     }
+
     public static void contrast2() {
-        String sour ="D:\\Documents\\pic\\41.png";
+        String sour = "D:\\Documents\\pic\\41.png";
         String des = "D:\\Documents\\pic\\hhm.jfif";
         double db = FaceUtils.compare_image(sour, des);
         System.out.println("相似度:\n" + db);
     }
+
     public static void contrast() {
         String sour = FileUtil.getResourceAbsolutePath("x1.jpg");
         String des = FileUtil.getResourceAbsolutePath("x1.jpg");
@@ -89,9 +92,9 @@ public class Application {
         try {
             //创建一个mat
             Mat img_mat = new Mat();
-            img_mat = FaceUtils.bufImg2Mat(FaceUtils.loadImage(address));
+            img_mat = OpenCvUtil.bufImg2Mat(OpenCvUtil.loadImage(address));
             img_mat = FaceUtils.detectFace(img_mat);//检测人脸
-            BufferedImage img2paint = FaceUtils.mat2BI(img_mat);
+            BufferedImage img2paint = OpenCvUtil.mat2BI(img_mat);
             Myframe f = new Myframe();
             f.setSize(img2paint.getWidth() + 200, img2paint.getHeight() + 200);
             f.draw(img2paint);
