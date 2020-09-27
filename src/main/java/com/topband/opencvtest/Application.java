@@ -30,7 +30,9 @@ public class Application {
     static {
         //直接下载window版，解压，使用里边的dll
         //linux 需要下载源码，生成so库 https://www.52pojie.cn/thread-872736-1-1.html
-        System.load(FileUtil.getAppicationPath() + File.separator + "libs\\opencv_java410.dll");
+       System.load(FileUtil.getAppicationPath() + File.separator + "libs\\opencv_java410.dll");
+        //System.load("/usr/local/share/java/opencv4/libopencv_java440.so");
+        //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.out.println("opencv\t" + Core.VERSION);
     }
 
