@@ -5,9 +5,14 @@ import com.topband.opencvtest.common.*;
 import com.topband.opencvtest.config.AppConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.*;
+import org.opencv.dnn.ClassificationModel;
+import org.opencv.dnn.DetectionModel;
+import org.opencv.dnn.Dnn;
+import org.opencv.dnn.Net;
 import org.opencv.features2d.ORB;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -15,6 +20,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
+import static com.topband.opencvtest.common.FaceUtils.cascadeClassifierXml;
 
 /**
  * @author ludi
@@ -46,7 +53,8 @@ public class Application {
 //        Mat mc5 = m.col(5);
 //        mc5.setTo(new Scalar(5));
         //System.out.println("OpenCV Mat data:\n" + m.dump());
-        AppConfig.context = SpringApplication.run(Application.class, args);
+       //detectThing();
+       AppConfig.context = SpringApplication.run(Application.class, args);
     }
 
     public static void cutFace() {
@@ -106,12 +114,100 @@ public class Application {
 
     }
 
+    /**
+     *  识别东西
+     */
+    public static void detectThing() {
+         String[] names = new String[]{
+                "aeroplane","bicycle","bird","boat","bottle",
+                "bus","car","cat","chair","cow",
+                "diningtable","dog","horse","motorbike","person",
+                "pottedplant","sheep","sofa","train","tvmonitor"
+        };
+        Net net = Dnn.readNetFromDarknet("D:\\opencv\\data\\tiny-yolo-voc.cfg", "D:\\opencv\\data\\tiny-yolo-voc.weights");
+        if ( net.empty() ) {
+            System.out.println("Reading Net error");
+        }
+
+        String image_file = "D:\\Documents\\pic\\mao.jfif";//IMG_9452.JPG
+        Mat im = Imgcodecs.imread(image_file, Imgcodecs.IMREAD_COLOR);
+        if( im.empty() ) {
+            System.out.println("Reading Image error");
+        }
+
+        Mat frame = new Mat();
+        Size sz1 = new Size(im.cols(),im.rows());
+        Imgproc.resize(im, frame, sz1);
+
+        Mat resized = new Mat();
+        Size sz = new Size(416,416);
+        Imgproc.resize(im, resized, sz);
+
+        float scale = 1.0F / 255.0F;
+        Mat inputBlob = Dnn.blobFromImage(im, scale, sz, new Scalar(0), false, false);
+        net.setInput(inputBlob, "data");
+        Mat detectionMat = net.forward("detection_out");
+        if( detectionMat.empty() ) {
+            System.out.println("No result");
+        }
+
+        for (int i = 0; i < detectionMat.rows(); i++)
+        {
+            int probability_index = 5;
+            int size = (int) (detectionMat.cols() * detectionMat.channels());
+
+            float[] data = new float[size];
+            detectionMat.get(i, 0, data);
+            float confidence = -1;
+            int objectClass = -1;
+            for (int j=0; j < detectionMat.cols();j++)
+            {
+                if (j>=probability_index && confidence<data[j])
+                {
+                    confidence = data[j];
+                    objectClass = j-probability_index;
+                }
+            }
+
+            if (confidence > 0.3)
+            {
+                System.out.println("Result Object: "+i);
+                for (int j=0; j < detectionMat.cols();j++)
+                    System.out.print(" "+j+":"+ data[j]);
+                System.out.println("");
+                float x = data[0];
+                float y = data[1];
+                float width = data[2];
+                float height = data[3];
+                float xLeftBottom = (x - width / 2) * frame.cols();
+                float yLeftBottom = (y - height / 2) * frame.rows();
+                float xRightTop = (x + width / 2) * frame.cols();
+                float yRightTop = (y + height / 2) * frame.rows();
+
+                System.out.println("Class: "+ names[objectClass]);
+                System.out.println("Confidence: "+confidence);
+
+                System.out.println("ROI: "+xLeftBottom+" "+yLeftBottom+" "+xRightTop+" "+yRightTop+"\n");
+
+                Imgproc.rectangle(frame, new Point(xLeftBottom, yLeftBottom),
+                        new Point(xRightTop,yRightTop),new Scalar(0, 255, 0),3);
+            }
+        }
+
+       // Imgcodecs.imwrite("out.jpg", frame );
+        HighGui gui = new HighGui();
+        gui.imshow("哈妮", frame);
+        gui.waitKey(500);
+    }
+
+
+
 
     public static void testLoadImg() {
         Mat src = Imgcodecs.imread(FileUtil.getResourceAbsolutePath("0.jfif"));
         HighGui gui = new HighGui();
         gui.imshow("哈妮", src);
-        gui.waitKey(1000);
+        gui.waitKey(500);
     }
 
 }
