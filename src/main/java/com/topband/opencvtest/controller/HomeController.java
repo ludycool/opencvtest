@@ -88,7 +88,9 @@ public class HomeController {
                 //创建一个mat
                 Mat img_mat = OpenCvUtil.bufImg2Mat(img);
                 img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切出人脸
-
+                if (img_mat == null) {
+                    return "未检测出脸部特征:";
+                }
                 Mat grayImage = new Mat();
                 // 灰度化
                 Imgproc.cvtColor(img_mat, grayImage, Imgproc.COLOR_BGR2GRAY);
@@ -127,7 +129,7 @@ public class HomeController {
                 */
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("detectface error", e);
+                log.error("aRecognize error", e);
             }
         }
         String nonaddress = FileUtil.getResourceAbsolutePath("non.png");
@@ -151,7 +153,6 @@ public class HomeController {
 
                 if (img_mat != null) {
                     BufferedImage img2paint = OpenCvUtil.mat2BI(img_mat);//转换图片
-
                     String id = nameToId(name);//id 与姓名 一一对应
                     String saveAddr = filePathHeadDb2 + File.separator + id + ".jpg";
                     boolean res = OpenCvUtil.saveImage(img2paint, saveAddr);//保存图片
@@ -163,7 +164,7 @@ public class HomeController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("detectface error", e);
+                log.error("aTrainIn error", e);
             }
 
             return false;
@@ -183,7 +184,9 @@ public class HomeController {
                 //创建一个mat
                 Mat img_mat = OpenCvUtil.bufImg2Mat(img);
                 img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切出人脸
-
+                if (img_mat == null) {
+                    return "未检测出脸部特征:";
+                }
                 IdConfidence idConfidence = FaceTrainAndRecognise.recognizerFace(img_mat);
                 String name = idToname(idConfidence.getId());
 
@@ -191,7 +194,7 @@ public class HomeController {
                 return Text;
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("detectface error", e);
+                log.error("bRecognize error", e);
                 return "系统出错:" + e.getMessage();
             }
         }
@@ -220,7 +223,7 @@ public class HomeController {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("detectface error", e);
+                log.error("bTrainIn error", e);
             }
             return false;
         } else {
@@ -290,8 +293,8 @@ public class HomeController {
     String idToname(String id) {
         try {
             byte[] data = Base64.getDecoder().decode(id);
-            String name = new String(data,"utf-8");
-            return  name;
+            String name = new String(data, "utf-8");
+            return name;
         } catch (Exception e) {
             e.printStackTrace();
         }
