@@ -290,7 +290,7 @@ public class HomeController {
     String idToname(String id) {
         try {
             byte[] data = Base64.getDecoder().decode(id);
-            String name = new String(data);
+            String name = new String(data,"utf-8");
             return  name;
         } catch (Exception e) {
             e.printStackTrace();
