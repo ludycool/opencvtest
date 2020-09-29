@@ -21,6 +21,7 @@ public class FileUtil {
      * 程序根路径
      */
     static String AppicationPath = "";
+
     /**
      * 获取程序根路径 如jar的根路径  最后面无斜杠 如d:/app
      *
@@ -69,6 +70,7 @@ public class FileUtil {
             return "";
         }
     }
+
     /**
      * 获取资源文件流
      *
@@ -136,20 +138,19 @@ public class FileUtil {
         file.createNewFile();
         return true;
     }
+
     /**
      * 将utf-8编码的汉字转为中文
-     * @author zhaoqiang
+     *
      * @param str
      * @return
+     * @author zhaoqiang
      */
-    public static String urlDecoding(String str){
+    public static String urlDecoding(String str) {
         String result = str;
-        try
-        {
+        try {
             result = URLDecoder.decode(str, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return result;
@@ -176,6 +177,7 @@ public class FileUtil {
         }
         return toFile;
     }
+
     //获取流文件
     private static void inputStreamToFile(InputStream ins, File file) {
         try {
@@ -190,5 +192,40 @@ public class FileUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 文件夹 是否存在，不存在，则创建
+     *
+     * @param path
+     */
+    public static void checkAndCreateDirectory(String path) {
+
+        File file = new File(path);
+//如果文件夹不存在则创建
+        if (!file.exists() && !file.isDirectory()) {
+            System.out.println("//不存在");
+            file.mkdir();
+        }
+
+    }
+
+    /**
+     * 文件夹 是否存在，不存在，则创建
+     *
+     * @param path
+     */
+    public static int getDirectoryFileNumber(String path) {
+
+        File[] files = new File(path).listFiles();
+        int count=0;
+        for (File f:files)
+        {
+            if (f.isFile())
+            {
+                ++count;
+            }
+        }
+        return  count;
     }
 }

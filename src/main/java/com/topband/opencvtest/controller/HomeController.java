@@ -1,6 +1,7 @@
 package com.topband.opencvtest.controller;
 
 import com.topband.opencvtest.common.*;
+import com.topband.opencvtest.mode.IdConfidence;
 import com.topband.opencvtest.mode.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,9 +25,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * @author ludi
@@ -40,55 +43,19 @@ import java.security.NoSuchAlgorithmException;
 public class HomeController {
 
 
+    @Value("${config.filepath.headdb2}")
+    public String filePathHeadDb2;
+
+    @Value("${config.filepath.model2}")
+    public String filePathModel2;
+
+
     @Value("${config.filepath.headdb}")
     public String filePathHeadDb;
 
     @Value("${config.filepath.model}")
     public String filePathModel;
 
-
-    @ApiOperation("头像 训练入库")
-    @PostMapping(value = "/trainIn", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "name", value = "姓名", required = true, dataType = "String")
-    })
-    public boolean trainIn(@RequestParam("facefile") MultipartFile file, String name) {
-        if (null != file) {
-            try {
-                BufferedImage img = ImageIO.read(FileUtil.multipartFileToFile(file));
-                Mat img_mat = OpenCvUtil.bufImg2Mat(img);
-                img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
-
-                if (img_mat != null) {
-                    BufferedImage img2paint = OpenCvUtil.mat2BI(img_mat);//转换图片
-
-                    String id = stringToMD5(name);//id 与姓名 一一对应
-
-                    String saveAddr = filePathHeadDb + File.separator + id + ".jpg";
-                    boolean res = OpenCvUtil.saveImage(img2paint, saveAddr);//保存图片
-                    if (res) {
-                        User user = new User();
-                        user.setId(id);
-                        user.setName(name);
-                        CacheUtil.userSet(user);
-
-                        TrainUtil.train(filePathHeadDb, filePathModel);//训练
-
-                        return true;
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("detectface error", e);
-            }
-
-            return false;
-        } else {
-            return false;//ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败，请选择要上传的文件!");
-        }
-        // ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败");
-    }
 
     @ApiOperation("检测人脸")
     @PostMapping(value = "/detectface", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -112,9 +79,9 @@ public class HomeController {
         // ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败");
     }
 
-    @ApiOperation("人脸 对比")
-    @PostMapping(value = "/recognize", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String recognize(@RequestParam("facefile") MultipartFile file, HttpServletResponse response) {
+    @ApiOperation("人脸对比A 库里每人只有一个特征值")
+    @PostMapping(value = "/aRecognize", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String aRecognize(@RequestParam("facefile") MultipartFile file, HttpServletResponse response) {
         if (null != file) {
             try {
                 BufferedImage img = ImageIO.read(FileUtil.multipartFileToFile(file));
@@ -127,7 +94,7 @@ public class HomeController {
                 Imgproc.cvtColor(img_mat, grayImage, Imgproc.COLOR_BGR2GRAY);
 
                 FaceRecognizer faceRecognizer = LBPHFaceRecognizer.create();
-                faceRecognizer.read(filePathModel + File.separator + TrainUtil.modeFileName);//加载特征
+                faceRecognizer.read(filePathModel2 + File.separator + FaceTrainAndRecognise.commonModeFileName);//加载特征
 
                 int[] labels = new int[1];
                 double[] confidences = new double[1];
@@ -136,8 +103,9 @@ public class HomeController {
                 double confidence = confidences[0];//可信度
                 String id = faceRecognizer.getLabelInfo(label);//保存时的id
 
-                User user = CacheUtil.userGet(id);
-                String Text = "姓名:" + user.getName() + "\r\n 相似度:";
+                String name = idToname(id);
+
+                String Text = "姓名:" + name + "\r\n 相似度:";
                 if (confidence <= 100) {
                     Text += (100 - confidence);
                 } else {
@@ -168,6 +136,98 @@ public class HomeController {
         return "系统出错";
     }
 
+
+    @ApiOperation("头像训练入库A 每人只保存一个特征值")
+    @PostMapping(value = "/aTrainIn", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "name", value = "姓名", required = true, dataType = "String")
+    })
+    public boolean aTrainIn(@RequestParam("facefile") MultipartFile file, String name) {
+        if (null != file) {
+            try {
+                BufferedImage img = ImageIO.read(FileUtil.multipartFileToFile(file));
+                Mat img_mat = OpenCvUtil.bufImg2Mat(img);
+                img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
+
+                if (img_mat != null) {
+                    BufferedImage img2paint = OpenCvUtil.mat2BI(img_mat);//转换图片
+
+                    String id = nameToId(name);//id 与姓名 一一对应
+                    String saveAddr = filePathHeadDb2 + File.separator + id + ".jpg";
+                    boolean res = OpenCvUtil.saveImage(img2paint, saveAddr);//保存图片
+                    if (res) {
+                        FaceTrainAndRecognise.train(filePathHeadDb2, filePathModel2, FaceTrainAndRecognise.commonModeFileName);//训练
+                        return true;
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("detectface error", e);
+            }
+
+            return false;
+        } else {
+            return false;//ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败，请选择要上传的文件!");
+        }
+        // ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败");
+    }
+
+
+    @ApiOperation("人脸对比B 每个人多个样本")
+    @PostMapping(value = "/bRecognize", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String bRecognize(@RequestParam("facefile") MultipartFile file, HttpServletResponse response) {
+        if (null != file) {
+            try {
+                BufferedImage img = ImageIO.read(FileUtil.multipartFileToFile(file));
+                //创建一个mat
+                Mat img_mat = OpenCvUtil.bufImg2Mat(img);
+                img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切出人脸
+
+                IdConfidence idConfidence = FaceTrainAndRecognise.recognizerFace(img_mat);
+                String name = idToname(idConfidence.getId());
+
+                String Text = "姓名:" + name + "\r\n 相似度:" + idConfidence.getConfidence();
+                return Text;
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("detectface error", e);
+                return "系统出错:" + e.getMessage();
+            }
+        }
+        //String nonaddress = FileUtil.getResourceAbsolutePath("non.png");
+        //  writeImage(OpenCvUtil.loadImage(nonaddress), response);
+        return "系统出错";
+    }
+
+
+    @ApiOperation("头像训练入库B 每个人保存多个样本")
+    @PostMapping(value = "/bTrainIn", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "name", value = "姓名", required = true, dataType = "String")
+    })
+    public boolean bTrainIn(@RequestParam("facefile") MultipartFile file, String name) {
+        if (null != file) {
+            try {
+                BufferedImage img = ImageIO.read(FileUtil.multipartFileToFile(file));
+                Mat img_mat = OpenCvUtil.bufImg2Mat(img);
+                img_mat = FaceUtils.detectFaceAndCut(img_mat);//检测剪切人脸
+
+                if (img_mat != null) {
+                    String id = nameToId(name);//id 与姓名 一一对应
+                    boolean res = FaceTrainAndRecognise.trainFace(img_mat, id);//保存与训练
+                    return res;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("detectface error", e);
+            }
+            return false;
+        } else {
+            return false;//ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败，请选择要上传的文件!");
+        }
+        // ResultModeHelper.fail(ConstantResult.UPLOAD_FAILED, "上传失败");
+    }
 
     /**
      * 生成32 位md5
@@ -213,5 +273,28 @@ public class HomeController {
 
             }
         }
+    }
+
+
+    String nameToId(String name) {
+        try {
+            byte[] data = name.getBytes("utf-8");
+            String id = Base64.getEncoder().encodeToString(data);
+            return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    String idToname(String id) {
+        try {
+            byte[] data = Base64.getDecoder().decode(id);
+            String name = new String(data);
+            return  name;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
