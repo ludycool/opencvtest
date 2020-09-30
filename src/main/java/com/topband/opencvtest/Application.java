@@ -40,6 +40,7 @@ public class Application {
        System.load(FileUtil.getAppicationPath() + File.separator + "libs\\opencv_java410.dll");
         //System.load("/usr/local/share/java/opencv4/libopencv_java440.so");
         //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        //detectface2();
         System.out.println("opencv\t" + Core.VERSION);
     }
 
@@ -214,7 +215,7 @@ public class Application {
         //Net net = Dnn.readNetFromCaffe("D:\\opencv\\data\\deploy.prototxt", "D:\\opencv\\data\\res10_300x300_ssd_iter_140000_fp16.caffemodel");
         Mat img = Imgcodecs.imread("D:\\Documents\\pic\\morefases.png"); // your data here !
         Mat blob = Dnn.blobFromImage(img, 1.0f,
-                new Size(300, 300),
+                new Size(500, 500),//至少300 越大检测越强
                 new Scalar(104, 177, 123, 0), /*swapRB*/false, /*crop*/false);
         net.setInput(blob);
         Mat res = net.forward("");
