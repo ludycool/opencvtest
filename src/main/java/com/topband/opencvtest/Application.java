@@ -53,7 +53,6 @@ public class Application {
 //        Mat mc5 = m.col(5);
 //        mc5.setTo(new Scalar(5));
         //System.out.println("OpenCV Mat data:\n" + m.dump());
-       //detectThing();
        AppConfig.context = SpringApplication.run(Application.class, args);
     }
 
@@ -98,7 +97,7 @@ public class Application {
     }
 
     public static void detectface() {
-        String address = FileUtil.getResourceAbsolutePath("x3.jfif");
+        String address = FileUtil.getResourceAbsolutePath("morefases.png");
         try {
             //创建一个mat
             Mat img_mat = new Mat();
@@ -200,6 +199,49 @@ public class Application {
         gui.waitKey(500);
     }
 
+    private static final String[] classNames = {"background",
+            "aeroplane", "bicycle", "bird", "boat",
+            "bottle", "bus", "car", "cat", "chair",
+            "cow", "diningtable", "dog", "horse",
+            "motorbike", "person", "pottedplant",
+            "sheep", "sofa", "train", "tvmonitor"};
+    /**
+     *  识别东西
+     */
+    public static void detectface2() {
+
+       Net net = Dnn.readNetFromTensorflow("D:\\opencv\\data\\opencv_face_detector_uint8.pb", "D:\\opencv\\data\\opencv_face_detector.pbtxt");
+        //Net net = Dnn.readNetFromCaffe("D:\\opencv\\data\\deploy.prototxt", "D:\\opencv\\data\\res10_300x300_ssd_iter_140000_fp16.caffemodel");
+        Mat img = Imgcodecs.imread("D:\\Documents\\pic\\morefases.png"); // your data here !
+        Mat blob = Dnn.blobFromImage(img, 1.0f,
+                new Size(300, 300),
+                new Scalar(104, 177, 123, 0), /*swapRB*/false, /*crop*/false);
+        net.setInput(blob);
+        Mat res = net.forward("");
+        Mat faces = res.reshape(1, res.size(2));
+        System.out.println("faces" + faces);
+        float [] data = new float[7];
+        for (int i=0; i<faces.rows(); i++)
+        {
+            faces.get(i, 0, data);
+            float confidence = data[2];
+            if (confidence > 0.2)
+            {
+                int left   = (int)(data[3] * img.cols());
+                int top    = (int)(data[4] * img.rows());
+                int right  = (int)(data[5] * img.cols());
+                int bottom = (int)(data[6] * img.rows());
+                System.out.println("("+left + "," + top + ")("+right+","+bottom+") " + confidence);
+                Imgproc.rectangle(img, new Point(left,top), new Point(right,bottom), new Scalar(0,200,0), 3);
+            }
+        }
+        Imgcodecs.imwrite("facedet.png", img);
+        // Imgcodecs.imwrite("out.jpg", frame );
+        HighGui gui = new HighGui();
+        gui.imshow("哈妮", faces);
+        gui.waitKey(500);
+    }
+
 
 
 
@@ -208,6 +250,35 @@ public class Application {
         HighGui gui = new HighGui();
         gui.imshow("哈妮", src);
         gui.waitKey(500);
+    }
+    public static Mat process(Net net, Mat img) {
+        Mat blob = Dnn.blobFromImage(img, 1./255, new Size(96,96), Scalar.all(0), true, false);
+        net.setInput(blob);
+        return net.forward().clone();
+    }
+
+    /**
+     * 头像对比
+     */
+    public static void openFaceRecognition() {
+        Net net = Dnn.readNetFromTorch("D:\\opencv\\data\\nn4.small2.v1.t7");
+        //Net net = Dnn.readNetFromCaffe("D:\\opencv\\data\\deploy.prototxt", "D:\\opencv\\data\\res10_300x300_ssd_iter_140000_fp16.caffemodel");
+
+        String sour = "D:\\Documents\\pic\\y1.png";
+        String des = "D:\\Documents\\pic\\lulu.jpg";
+        Mat feature1 = process(net, Imgcodecs.imread(sour)); // your data here !
+        Mat feature2 = process(net, Imgcodecs.imread(des)); // your data here !
+        double dist  = Core.norm(feature1,  feature2);
+        System.out.println("distance: " + dist);
+        if (dist < 0.6)
+            System.out.println("SAME !");
+    }
+    public static void openFacedetectface() {
+        Net net = Dnn.readNetFromTorch("D:\\opencv\\data\\openface.nn4.small2.v1.t7");
+        String sour = "D:\\Documents\\pic\\l3.jpg";
+        Mat feature1 = process(net, Imgcodecs.imread(sour)); // your data here !
+        Imgcodecs.imwrite("feature1.png", feature1);
+
     }
 
 }
