@@ -54,6 +54,7 @@ public class Application {
 //        Mat mc5 = m.col(5);
 //        mc5.setTo(new Scalar(5));
         //System.out.println("OpenCV Mat data:\n" + m.dump());
+        //detectface2();
        AppConfig.context = SpringApplication.run(Application.class, args);
     }
 
@@ -211,14 +212,20 @@ public class Application {
      */
     public static void detectface2() {
 
-       Net net = Dnn.readNetFromTensorflow("D:\\opencv\\data\\opencv_face_detector_uint8.pb", "D:\\opencv\\data\\opencv_face_detector.pbtxt");
-        //Net net = Dnn.readNetFromCaffe("D:\\opencv\\data\\deploy.prototxt", "D:\\opencv\\data\\res10_300x300_ssd_iter_140000_fp16.caffemodel");
+       //Net net = Dnn.readNetFromTensorflow("D:\\opencv\\data\\opencv_face_detector_uint8.pb", "D:\\opencv\\data\\opencv_face_detector.pbtxt");
+        Net net = Dnn.readNetFromCaffe("D:\\opencv\\data\\deploy.prototxt", "D:\\opencv\\data\\res10_300x300_ssd_iter_140000_fp16.caffemodel");
         Mat img = Imgcodecs.imread("D:\\Documents\\pic\\morefases.png"); // your data here !
-        Mat blob = Dnn.blobFromImage(img, 1.0f,
-                new Size(500, 500),//至少300 越大检测越强
-                new Scalar(104, 177, 123, 0), /*swapRB*/false, /*crop*/false);
-        net.setInput(blob);
-        Mat res = net.forward("");
+//        Mat blob = Dnn.blobFromImage(img, 1.0f,
+//                new Size(500, 500),//至少300 越大检测越强
+//                new Scalar(104, 177, 123, 0), /*swapRB*/false, /*crop*/false);
+        Mat inputBlob = Dnn.blobFromImage(img, 1.0f,
+                new Size(img.size().width ,img.size().height ),
+                new Scalar(124, 97, 113), false, false);
+//                Mat inputBlob = Dnn.blobFromImage(img, 1.0f,
+//                new Size(1000 ,1000 ),
+//                new Scalar(124, 97, 113), false, false);
+        net.setInput(inputBlob);
+        Mat res = net.forward();
         Mat faces = res.reshape(1, res.size(2));
         System.out.println("faces" + faces);
         float [] data = new float[7];
@@ -226,7 +233,7 @@ public class Application {
         {
             faces.get(i, 0, data);
             float confidence = data[2];
-            if (confidence > 0.2)
+            if (confidence > 0.4f)
             {
                 int left   = (int)(data[3] * img.cols());
                 int top    = (int)(data[4] * img.rows());
@@ -237,10 +244,10 @@ public class Application {
             }
         }
         Imgcodecs.imwrite("facedet.png", img);
-        // Imgcodecs.imwrite("out.jpg", frame );
-        HighGui gui = new HighGui();
-        gui.imshow("哈妮", faces);
-        gui.waitKey(500);
+        BufferedImage img2paint = OpenCvUtil.mat2BI(img);
+        Myframe f = new Myframe();
+        f.setSize(img2paint.getWidth() + 200, img2paint.getHeight() + 200);
+        f.draw(img2paint);
     }
 
 
